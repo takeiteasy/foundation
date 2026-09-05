@@ -1,0 +1,3 @@
+[submodule "vendor/buffalo"]
+	path = vendor/buffalo
+	url = git@github.com:takeiteasy/buffalo.git

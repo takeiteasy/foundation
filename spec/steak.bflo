@@ -1,0 +1,112 @@
+# steak.bflo -- steak's token vocabulary, first slice.
+#
+# Consumed at compile time by buffalo (running inside cccc's comptime pass,
+# driven by vendor/buffalo/src/buf_comptime.c with -D BUF_SPEC="spec/steak.bflo").
+# spec/steak_tokens.h is the checked-in token header validated against the
+# %tokens list below (name and order); TOK_EOF = 0 and TOK_ERROR = 1 are
+# reserved by buf_rt.h.
+#
+# Slice scope: keywords, identifiers, decimal + hex int literals, float
+# literals, plain string literals, the full operator/punct set, `#` line
+# comments, and NEWLINE as a real token. NEWLINE is deliberately NOT skipped:
+# the planned ASI filter (design.md decision #12) sits between buf_next() and
+# the parser and rewrites/drops NEWLINE tokens, so the lexer must emit them.
+# Still missing (tracked on the steak tracker): octal/binary int literals,
+# char literals, triple-quoted raw strings, triple-backtick templates, and
+# the `${}` interpolation mini-lexer.
+#
+# Known slice infidelities vs the Nim lexer (a DFA cannot express these
+# context checks; they belong to a later semantic pass):
+#   - `0x` with no digits lexes as INT(0) IDENT(x); Nim raises.
+#   - `1.` lexes as INT(1) DOT; `1e` as INT(1) IDENT(e); Nim raises.
+#   - misplaced `_` in a number lexes as a shorter INT plus TOK_ERROR;
+#     Nim raises.
+#
+# Regex v1: no {n,m}, no anchors, no lookaround. Whole-line `#` starts a
+# comment here (the HASH rule below is steak's own comment token and is a
+# %skip rule, not a named token).
+
+%skip     [ \t\r]+
+%skip     "#" [^\n]*
+
+%tokens KW_TRUE KW_FALSE KW_NULL KW_VAR KW_CONST KW_FUNCTION KW_IF KW_ELSE KW_WHILE KW_FOR KW_IN KW_RETURN KW_BREAK KW_CONTINUE KW_THROW KW_TRY KW_CATCH KW_FINALLY KW_AS KW_SYNTAX IDENT NEWLINE INT FLOAT STRING SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON DOT ELLIPSIS QUESTION PLUS MINUS STAR SLASH SLASHSLASH PERCENT INC DEC ASSIGN PLUSASSIGN MINUSASSIGN STARASSIGN SLASHASSIGN SLASHSLASHASSIGN PERCENTASSIGN AMPASSIGN PIPEASSIGN CARETASSIGN SHLASSIGN SHRASSIGN USHRASSIGN AMPAMPASSIGN PIPEPIPEASSIGN EQEQ NOTEQ LT LE GT GE SHL SHR USHR AMP PIPE CARET TILDE AMPAMP PIPEPIPE BANG
+
+NEWLINE   \n
+
+KW_TRUE     "true"
+KW_FALSE    "false"
+KW_NULL     "null"
+KW_VAR      "var"
+KW_CONST    "const"
+KW_FUNCTION "function"
+KW_IF       "if"
+KW_ELSE     "else"
+KW_WHILE    "while"
+KW_FOR      "for"
+KW_IN       "in"
+KW_RETURN   "return"
+KW_BREAK    "break"
+KW_CONTINUE "continue"
+KW_THROW    "throw"
+KW_TRY      "try"
+KW_CATCH    "catch"
+KW_FINALLY  "finally"
+KW_AS       "as"
+KW_SYNTAX   "syntax"
+
+FLOAT     (0|[1-9]) (_?[0-9])* \. [0-9] (_?[0-9])* ([eE] [+-]? [0-9] (_?[0-9])*)? | (0|[1-9]) (_?[0-9])* [eE] [+-]? [0-9] (_?[0-9])*
+INT       0 [xX] [0-9a-fA-F] (_?[0-9a-fA-F])* | (0|[1-9]) (_?[0-9])*
+STRING    "\"" ([^"\\\n] | \\ .)* "\""
+IDENT     [a-zA-Z_] [a-zA-Z0-9_]*
+
+ELLIPSIS  "..."
+INC       "++"
+DEC       "--"
+SLASHSLASH "//"
+EQEQ      "=="
+NOTEQ     "!="
+LE        "<="
+GE        ">="
+SHL       "<<"
+SHR       ">>"
+USHR      ">>>"
+AMPAMP    "&&"
+PIPEPIPE  "||"
+PLUSASSIGN "+="
+MINUSASSIGN "-="
+STARASSIGN  "*="
+SLASHASSIGN "/="
+PERCENTASSIGN "%="
+SLASHSLASHASSIGN "//="
+AMPASSIGN   "&="
+PIPEASSIGN  "|="
+CARETASSIGN "^="
+SHLASSIGN   "<<="
+SHRASSIGN   ">>="
+USHRASSIGN  ">>>="
+AMPAMPASSIGN "&&="
+PIPEPIPEASSIGN "||="
+PLUS    "+"
+MINUS   "-"
+STAR    "*"
+SLASH   "/"
+PERCENT "%"
+ASSIGN  "="
+LT      "<"
+GT      ">"
+AMP     "&"
+PIPE    "|"
+CARET   "^"
+TILDE   "~"
+BANG    "!"
+LPAREN  "("
+RPAREN  ")"
+LBRACE  "{"
+RBRACE  "}"
+LBRACKET "["
+RBRACKET "]"
+COMMA   ","
+COLON   ":"
+DOT     "."
+QUESTION "?"
+SEMI    ";"

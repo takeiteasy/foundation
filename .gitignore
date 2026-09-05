@@ -1,0 +1,8 @@
+# build outputs
+build/
+bin/
+examples/*.out
+
+# local-only: pre-port Nim implementation and porting scoping notes
+old/
+STEAK-PORT-NOTES.md

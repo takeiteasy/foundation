@@ -1,0 +1,15 @@
+# hello.fn -- smoke input for the lexer slice: one line per token kind family.
+var hp = 100
+const name = "hero"
+
+function hit(dmg) {
+    hp -= dmg          # a comment
+    if hp <= 0 && name != "hero" {
+        return false
+    }
+    return hp > 0 ? 1 : 0
+}
+
+for i in 0..5 {
+    hit(i * 1.5e-1)
+}
